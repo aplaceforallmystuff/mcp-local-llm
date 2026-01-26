@@ -10,8 +10,9 @@ import {
 import OpenAI from "openai";
 
 // Configuration from environment
-const BASE_URL = process.env.LOCAL_LLM_BASE_URL || "http://localhost:12434/engines/v1";
-const DEFAULT_MODEL = process.env.LOCAL_LLM_MODEL || "ai/gemma3:latest";
+// Default to Ollama (11434) - change to 12434 for Docker Model Runner
+const BASE_URL = process.env.LOCAL_LLM_BASE_URL || "http://localhost:11434/v1";
+const DEFAULT_MODEL = process.env.LOCAL_LLM_MODEL || "qwen2.5-coder:7b";
 const DEFAULT_MAX_TOKENS = parseInt(process.env.LOCAL_LLM_MAX_TOKENS || "2048");
 const DEFAULT_TEMPERATURE = parseFloat(process.env.LOCAL_LLM_TEMPERATURE || "0.7");
 
