@@ -1,7 +1,7 @@
 {
   "name": "mcp-local-llm",
-  "version": "1.0.0",
-  "description": "MCP server for delegating tasks to local LLMs via Docker Model Runner",
+  "version": "1.0.1",
+  "description": "MCP server for delegating mechanical tasks to local LLMs via Ollama",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -15,10 +15,10 @@
   "keywords": [
     "mcp",
     "llm",
-    "docker",
-    "model-runner",
+    "ollama",
     "local-ai",
-    "claude-code"
+    "claude-code",
+    "model-context-protocol"
   ],
   "author": "Jim Christian",
   "license": "MIT",

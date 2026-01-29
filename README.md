@@ -1,8 +1,10 @@
 # mcp-local-llm
 
-MCP server for delegating tasks to local LLMs via Docker Model Runner. Enables Claude Code to orchestrate a local model for "grunt work" - saving API costs while maintaining quality through smart delegation.
+MCP server that lets Claude Code delegate mechanical tasks to a local LLM. Claude does the thinking; your local model handles the grunt work — summarization, classification, extraction, drafting.
 
-## The Idea
+This is **not** a replacement for Claude. It's a cost-optimization layer. Claude stays in control, decides what to delegate, and reviews the output. The local model just does volume work that doesn't need frontier reasoning.
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -20,50 +22,48 @@ MCP server for delegating tasks to local LLMs via Docker Model Runner. Enables C
                       │ OpenAI-compatible API
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│         Docker Model Runner (localhost:12434)               │
-│              Local LLM on Apple Silicon                     │
+│              Ollama (localhost:11434)                        │
+│           or any OpenAI-compatible backend                  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Requirements
 
-- Docker Desktop with Model Runner enabled
-- Apple Silicon Mac (M1/M2/M3/M4)
+- [Ollama](https://ollama.com/) installed and running
 - Node.js 18+
+- Claude Code (or any MCP-compatible client)
 
 ## Setup
 
-### 1. Enable Docker Model Runner with TCP access
+### 1. Install Ollama and pull a model
 
 ```bash
-docker desktop enable model-runner --tcp=12434
+# Install Ollama (macOS)
+brew install ollama
+
+# Start the Ollama service
+ollama serve
+
+# Pull the default model
+ollama pull qwen2.5-coder:7b
 ```
 
-### 2. Pull a model
+### 2. Clone and build
 
 ```bash
-# Small, fast model (good for 8-16GB RAM)
-docker model pull ai/gemma3:latest
-
-# Or larger, more capable (needs 16GB+ RAM)
-docker model pull ai/llama3.1:8b-instruct-q4_k_m
-```
-
-### 3. Install and build
-
-```bash
-cd ~/Dev/mcp-local-llm
+git clone https://github.com/aplaceforallmystuff/mcp-local-llm.git
+cd mcp-local-llm
 npm install
 npm run build
 ```
 
-### 4. Add to Claude Code
+### 3. Add to Claude Code
 
 ```bash
 claude mcp add local-llm -s user -- node /path/to/mcp-local-llm/dist/index.js
 ```
 
-Or manually add to `~/.claude.json`:
+Or add manually to `~/.claude.json`:
 
 ```json
 {
@@ -76,6 +76,10 @@ Or manually add to `~/.claude.json`:
 }
 ```
 
+### 4. Verify
+
+In Claude Code, the `local_status` tool should show your Ollama connection and available models.
+
 ## Available Tools
 
 ### `local_summarize`
@@ -83,7 +87,7 @@ Summarize text using the local LLM.
 
 **Parameters:**
 - `text` (required): Text to summarize
-- `style`: "brief" | "detailed" | "bullet_points" | "executive"
+- `style`: `"brief"` | `"detailed"` | `"bullet_points"` | `"executive"`
 - `max_length`: Approximate max words (default: 150)
 - `focus`: Specific aspect to emphasize
 
@@ -117,7 +121,7 @@ Extract structured information from text.
 **Parameters:**
 - `text` (required): Text to extract from
 - `fields` (required): Array of fields to extract
-- `output_format`: "json" | "yaml" | "markdown_table"
+- `output_format`: `"json"` | `"yaml"` | `"markdown_table"`
 
 **Use for:** Parsing documents, data extraction
 
@@ -142,18 +146,39 @@ Raw completion for maximum flexibility.
 **Use for:** Custom tasks that don't fit other tools
 
 ### `local_status`
-Check local LLM status and available models.
+Check local LLM connection status and available models.
 
 ## Configuration
 
-Environment variables:
+Environment variables (all optional — defaults work with a standard Ollama install):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `LOCAL_LLM_BASE_URL` | `http://localhost:12434/engines/v1` | Model Runner API endpoint |
-| `LOCAL_LLM_MODEL` | `ai/gemma3:latest` | Default model to use |
+| `LOCAL_LLM_BASE_URL` | `http://localhost:11434/v1` | Ollama API endpoint |
+| `LOCAL_LLM_MODEL` | `qwen2.5-coder:7b` | Model to use |
 | `LOCAL_LLM_MAX_TOKENS` | `2048` | Default max tokens |
 | `LOCAL_LLM_TEMPERATURE` | `0.7` | Default temperature |
+
+### Alternative: Docker Model Runner
+
+If you prefer Docker Model Runner over Ollama:
+
+```bash
+# Enable Model Runner with TCP access
+docker desktop enable model-runner --tcp=12434
+
+# Pull a model
+docker model pull ai/gemma3:latest
+```
+
+Then set the environment variables:
+
+```bash
+export LOCAL_LLM_BASE_URL="http://localhost:12434/engines/v1"
+export LOCAL_LLM_MODEL="ai/gemma3:latest"
+```
+
+Any backend that exposes an OpenAI-compatible API will work.
 
 ## Delegation Philosophy
 
@@ -165,7 +190,27 @@ Environment variables:
 | Novel problem solving | Simple classification |
 | Final editing | Initial draft generation |
 
-The key insight: **Claude reviews, local model produces**. The local model handles volume, Claude handles quality control.
+Claude reviews, local model produces. The local model handles volume; Claude handles quality control.
+
+## Troubleshooting
+
+**"Connection refused" or status shows error**
+- Check Ollama is running: `ollama list`
+- Start it if needed: `ollama serve`
+- Verify the port: `curl http://localhost:11434/v1/models`
+
+**"Model not found"**
+- Pull the model: `ollama pull qwen2.5-coder:7b`
+- Or set a different model via `LOCAL_LLM_MODEL`
+
+**Using a different backend**
+- Set `LOCAL_LLM_BASE_URL` to your backend's OpenAI-compatible endpoint
+- Set `LOCAL_LLM_MODEL` to a model your backend supports
+
+**Tools not appearing in Claude Code**
+- Verify the MCP server is configured: `claude mcp list`
+- Check the path to `dist/index.js` is correct
+- Rebuild if needed: `npm run build`
 
 ## License
 

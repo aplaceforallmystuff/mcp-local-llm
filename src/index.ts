@@ -392,7 +392,7 @@ async function getStatus(): Promise<string> {
         status: "error",
         base_url: BASE_URL,
         error: error instanceof Error ? error.message : "Unknown error",
-        hint: "Ensure Docker Model Runner is running with TCP enabled: docker desktop enable model-runner --tcp=12434",
+        hint: "Ensure Ollama is running: ollama serve. If using Docker Model Runner, set LOCAL_LLM_BASE_URL to http://localhost:12434/engines/v1",
       },
       null,
       2
@@ -404,7 +404,7 @@ async function getStatus(): Promise<string> {
 const server = new Server(
   {
     name: "mcp-local-llm",
-    version: "1.0.0",
+    version: "1.0.1",
   },
   {
     capabilities: {

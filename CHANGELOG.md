@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-01-26
+
+### Changed
+- Default backend switched from Docker Model Runner to Ollama (localhost:11434)
+- Default model changed from ai/gemma3:latest to qwen2.5-coder:7b
+- Status error hint now references Ollama setup instead of Docker Model Runner
+
 ## [1.0.0] - 2025-12-15
 
 ### Added
