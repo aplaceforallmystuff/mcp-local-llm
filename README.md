@@ -6,26 +6,9 @@ This is **not** a replacement for Claude. It's a cost-optimization layer. Claude
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                  Claude Code (Opus 4.5)                     │
-│                 "The Orchestrator Brain"                    │
-│  • Complex reasoning, planning, quality control             │
-│  • Decides what to delegate vs. do itself                   │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ MCP Tool Calls
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     mcp-local-llm                           │
-│  Tools: local_summarize, local_draft, local_classify...    │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ OpenAI-compatible API
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Ollama (localhost:11434)                        │
-│           or any OpenAI-compatible backend                  │
-└─────────────────────────────────────────────────────────────┘
-```
+![mcp-local-llm architecture](docs/architecture.png)
+
+Claude Code sits at the top as the orchestrator. It calls mcp-local-llm tools via MCP, which forward requests to Ollama (or any OpenAI-compatible backend) running locally. Claude decides what to delegate and reviews what comes back.
 
 ## Requirements
 
@@ -191,6 +174,90 @@ Any backend that exposes an OpenAI-compatible API will work.
 | Final editing | Initial draft generation |
 
 Claude reviews, local model produces. The local model handles volume; Claude handles quality control.
+
+## Teaching Claude to Delegate
+
+Once the MCP server is running, Claude Code can call these tools automatically. But Claude won't know *when* to use them unless you tell it. Here's how to set that up.
+
+### Option 1: Add routing instructions to CLAUDE.md
+
+The most reliable approach. Add delegation rules to your project or global `CLAUDE.md` file so Claude applies them every session:
+
+```markdown
+## Local LLM Routing
+
+Route mechanical tasks to local models via `mcp__local-llm__*` tools to save API costs.
+
+| Task Type | Tool | Example |
+|-----------|------|---------|
+| Summarizing content | `local_summarize` | Condensing research notes |
+| Initial drafts | `local_draft` | Boilerplate emails, docstrings |
+| Classification | `local_classify` | Sorting items, tagging content |
+| Data extraction | `local_extract` | Parsing structured data from text |
+| Text transformation | `local_transform` | Formatting changes, style conversions |
+| Custom simple tasks | `local_complete` | Any mechanical task with clear instructions |
+
+### When NOT to Route Locally
+
+- Complex reasoning or analysis
+- Security-sensitive operations
+- Tasks requiring multi-step tool chains
+- Content requiring voice/style judgment
+- Anything you specifically want Claude's opinion on
+```
+
+### Option 2: Ask Claude directly
+
+You can tell Claude to delegate in conversation:
+
+```
+"Summarize these 20 files using the local model"
+"Use local_classify to sort these inbox items into categories: work, personal, spam"
+"Draft a README section using local_draft, then review and clean it up yourself"
+```
+
+Claude will call the MCP tools and review the output before presenting it to you.
+
+### Option 3: Build it into custom agents
+
+If you use Claude Code's agent system, add delegation instructions to agent definitions:
+
+```markdown
+## Agent: inbox-processor
+
+When classifying inbox items, use `local_classify` to categorize each item
+before deciding where to file it. Use `local_summarize` to create brief
+descriptions for items that need them.
+```
+
+### Practical Examples
+
+**Batch summarize research files:**
+```
+"Read all the markdown files in ./research/ and use local_summarize to create
+a bullet-point summary of each one. Compile the summaries into a single document."
+```
+
+**Classify and sort content:**
+```
+"I have 30 notes in my inbox folder. Use local_classify with categories
+[project, reference, action-item, archive] to sort them, then move each
+file to the appropriate folder."
+```
+
+**Draft-then-refine workflow:**
+```
+"Use local_draft to generate initial docstrings for all exported functions
+in src/. Then review each one and fix anything that's inaccurate or unclear."
+```
+
+**Extract structured data:**
+```
+"Extract the name, email, company, and role from each of these email signatures
+using local_extract. Output as a JSON array."
+```
+
+The pattern is always the same: local model produces, Claude reviews. You get the cost savings of a 7B model for volume work, with Claude's judgment as the quality gate.
 
 ## Troubleshooting
 
