@@ -28,7 +28,7 @@
   },
   "homepage": "https://jimchristian.net",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "openai": "^4.70.0"
   },
   "devDependencies": {
