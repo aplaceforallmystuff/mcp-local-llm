@@ -2,3 +2,8 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# Environment files
+.env
+.env.local
+.env.*.local
