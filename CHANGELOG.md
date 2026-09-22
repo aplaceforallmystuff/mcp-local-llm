@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Default model changed from qwen2.5-coder:7b to gemma4:latest
+
 ## [1.0.1] - 2026-01-26
 
 ### Changed

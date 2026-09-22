@@ -32,7 +32,7 @@ npm start           # node dist/index.js
 | Variable | Default | Required |
 |----------|---------|----------|
 | `LOCAL_LLM_BASE_URL` | `http://localhost:11434/v1` | No |
-| `LOCAL_LLM_MODEL` | `qwen2.5-coder:7b` | No |
+| `LOCAL_LLM_MODEL` | `gemma4:latest` | No |
 | `LOCAL_LLM_MAX_TOKENS` | `2048` | No |
 | `LOCAL_LLM_TEMPERATURE` | `0.7` | No |
 

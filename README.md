@@ -28,7 +28,7 @@ brew install ollama
 ollama serve
 
 # Pull the default model
-ollama pull qwen2.5-coder:7b
+ollama pull gemma4:latest
 ```
 
 ### 2. Clone and build
@@ -138,7 +138,7 @@ Environment variables (all optional — defaults work with a standard Ollama ins
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LOCAL_LLM_BASE_URL` | `http://localhost:11434/v1` | Ollama API endpoint |
-| `LOCAL_LLM_MODEL` | `qwen2.5-coder:7b` | Model to use |
+| `LOCAL_LLM_MODEL` | `gemma4:latest` | Model to use |
 | `LOCAL_LLM_MAX_TOKENS` | `2048` | Default max tokens |
 | `LOCAL_LLM_TEMPERATURE` | `0.7` | Default temperature |
 
@@ -257,7 +257,7 @@ in src/. Then review each one and fix anything that's inaccurate or unclear."
 using local_extract. Output as a JSON array."
 ```
 
-The pattern is always the same: local model produces, Claude reviews. You get the cost savings of a 7B model for volume work, with Claude's judgment as the quality gate.
+The pattern is always the same: local model produces, Claude reviews. You get the cost savings of a small local model for volume work, with Claude's judgment as the quality gate.
 
 ## Troubleshooting
 
@@ -267,7 +267,7 @@ The pattern is always the same: local model produces, Claude reviews. You get th
 - Verify the port: `curl http://localhost:11434/v1/models`
 
 **"Model not found"**
-- Pull the model: `ollama pull qwen2.5-coder:7b`
+- Pull the model: `ollama pull gemma4:latest`
 - Or set a different model via `LOCAL_LLM_MODEL`
 
 **Using a different backend**
